@@ -1,5 +1,5 @@
-from langchain.chat_models import ChatOpenAI
-from langchain import PromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain.prompts import PromptTemplate
 import streamlit as st
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streamlit import StreamlitCallbackHandler
@@ -31,20 +31,26 @@ def handleClick():
                                             location=location, days=days).to_messages())
 
 
-with st.sidebar:
-    companion = st.selectbox(
-        "Travelling with", ("Noone", "Family", "Spouse", "Family with kids", "Friends"))
-    location = st.text_input("Location")
-    days = st.number_input("days", min_value=1, max_value=50)
-    st.button('Submit', on_click=handleClick)
 
 with st.container():
-    st.header('Vacation Planner')
+    st.header('Vacation Planner',divider=True)
+    subheading = st.subheader("Enter you Open Api Keys in the sidebar")
     ''' The ultimate vacation planner will create a perfect itnerary for you. Just give the 
     name of country and duration. Oh! and do mention whom are you travelling with'''
 
-response = st.empty()
+with st.sidebar:
+    OPENAI_API_KEY = st.text_input(
+        '**Enter OpenAI API Key 🔑**' ,placeholder='Paste your key(🔑) here',type='password')
+    if OPENAI_API_KEY:
+        subheading.empty()
+        companion = st.selectbox(
+            "Travelling with", ("Noone", "Family", "Spouse", "Family with kids", "Friends"))
+        location = st.text_input("Location")
+        days = st.number_input("days", min_value=1, max_value=50)
+        st.button('Submit', on_click=handleClick)
 
-chat = ChatOpenAI(streaming=True, callback_manager=CallbackManager(
-    [StreamlitCallbackHandler(response)]), verbose=True, temperature=0,
-    openai_api_key=st.secrets["openai_api_key"])
+response = st.empty()
+if OPENAI_API_KEY:
+    chat = ChatOpenAI(streaming=True, callback_manager=CallbackManager(
+        [StreamlitCallbackHandler(response)]), verbose=True, temperature=0,
+        openai_api_key=OPENAI_API_KEY)
