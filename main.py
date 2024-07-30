@@ -8,6 +8,7 @@ from langchain.prompts import (
     PromptTemplate,
     SystemMessagePromptTemplate,
 )
+from openai import AuthenticationError
 
 
 template = """
@@ -50,7 +51,10 @@ with st.sidebar:
         st.button('Submit', on_click=handleClick)
 
 response = st.empty()
-if OPENAI_API_KEY:
-    chat = ChatOpenAI(streaming=True, callback_manager=CallbackManager(
-        [StreamlitCallbackHandler(response)]), verbose=True, temperature=0,
-        openai_api_key=OPENAI_API_KEY)
+try:
+    if OPENAI_API_KEY:
+        chat = ChatOpenAI(streaming=True, callback_manager=CallbackManager(
+            [StreamlitCallbackHandler(response)]), verbose=True, temperature=0,
+            openai_api_key=OPENAI_API_KEY)
+except AuthenticationError:
+    st.error("Invalid OpenAI API Key")
